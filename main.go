@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -17,6 +18,7 @@ const (
 	tasksPath   = "./templates/tasks.html"
 	wrapperPath = "./templates/tasks-wrapper.html"
 	storagePath = "./storage/tasks.json"
+	backupPath  = "./storage/tasks-backup.json"
 )
 
 type Task struct {
@@ -197,11 +199,30 @@ func handleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleBackup() {
+	for {
+		b, err := os.ReadFile(storagePath)
+		if err != nil {
+			log.Println("Failed to create backup. ", err.Error())
+			continue
+		}
+		err = os.WriteFile(backupPath, b, 0644)
+		if err != nil {
+			log.Println("Failed to create backup. ", err.Error())
+			continue
+		}
+		log.Println("Created backup")
+		time.Sleep(5 * time.Minute)
+	}
+}
+
 func main() {
 	http.HandleFunc("/", handleMain)
 	http.HandleFunc("/delete", handleDelete)
 	http.HandleFunc("/create", handleCreate)
 	http.Handle("/resourses/", http.StripPrefix("/resourses", http.FileServer(http.Dir("./resourses"))))
+
+	go handleBackup()
 
 	log.Println("Server listening on port", port)
 	err := http.ListenAndServe(port, nil)
