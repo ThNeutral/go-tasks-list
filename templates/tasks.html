@@ -1,0 +1,18 @@
+<div>
+  {{define "tasks"}}
+  <div id="tasks-div" class="tasks">
+    <h3 class="header">Current tasks</h3>
+        <div class="tasks-list">
+        {{ range $i, $t := .Current }} 
+            <div class="task" id={{print "task" $i}}>
+                <img hx-delete={{print "/delete?id=" $t.Id}} hx-trigger="click" class="cross"
+                src="../resourses/cross.png" hx-target="#tasks-div" hx-swap="outerHTML"/>
+                <p>{{$t.Name}}</p>
+                <p>{{$t.Description}}</p>
+                <p>Due to: {{$t.Date}}</p>
+            </div>
+        {{end}}
+    </div>
+  </div>
+  {{end}}
+</div>
